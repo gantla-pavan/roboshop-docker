@@ -22,8 +22,7 @@ COPY src ./src
 # Build the JAR
 RUN mvn clean package
 
-FROM openjdk:8-jdk
-
+FROM eclipse-temurin:8-jdk
 
 WORKDIR /opt/server
 
