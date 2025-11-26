@@ -46,11 +46,12 @@ COPY src ./src
 RUN mvn clean package
 
 # Run stage
-FROM openjdk:8-jdk
+FROM eclipse-temurin:8-jdk
 WORKDIR /opt/server
 COPY --from=build /opt/server/target/shipping.jar shipping.jar
 EXPOSE 8080
 CMD ["java", "-jar", "shipping.jar"]
+
 
 
 
