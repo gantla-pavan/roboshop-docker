@@ -22,8 +22,8 @@ COPY src ./src
 # Build the JAR
 RUN mvn clean package
 
-# Second stage: run the JAR
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk
+
 
 WORKDIR /opt/server
 
