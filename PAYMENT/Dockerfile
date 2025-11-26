@@ -15,20 +15,23 @@
 # CMD ["uwsgi", "--ini", "payment.ini"]
 
 
+# Use Python 3.9
+FROM python:3.9
+
 # Set working directory
 WORKDIR /opt/server
 
-# Copy Python files
+# Copy Python source files
 COPY *.py .
 
 # Copy uWSGI config
 COPY payment.ini .
 
-# Install dependencies
+# Copy requirements and install
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
-# Set environment variables
+# Environment variables
 ENV CART_HOST="cart" \
     CART_PORT="8080" \
     USER_HOST="user" \
