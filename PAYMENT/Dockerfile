@@ -11,4 +11,5 @@ ENV CART_HOST="cart"
      AMPQPHOST="rabbitmq"
      AMQP_USER="roboshop"
     AMQP_PASSWORD="roboshop123"
+
 CMD ["uwsgi", "--ini", "payment.ini"]
