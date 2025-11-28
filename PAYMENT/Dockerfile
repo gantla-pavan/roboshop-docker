@@ -1,47 +1,57 @@
-# FROM python:3.9
-# EXPOSE 8080
-# WORKDIR /opt/server/payment.ini
-# COPY *.py .
-# COPY requirements.txt .
-# RUN pip3 install -r requirements.txt
-# ENV CART_HOST="cart" \
-#      CART_PORT="8080" \
-#      USER_HOST="user" \
-#      USER_PORT="8080" \
-#      AMPQPHOST="rabbitmq" \
-#      AMQP_USER="roboshop" \
-#     AMQP_PASSWORD="roboshop123"
-
-# CMD ["uwsgi", "--ini", "payment.ini"]
-
-
-# Use Python 3.9
-FROM python:3.9
-
-# Set working directory
+# ===========================
+# Stage 1: Builder (Alpine)
+# ===========================
+FROM python:3.9.25-alpine3.21 AS builder
 WORKDIR /opt/server
-
-# Copy Python source files
-COPY *.py .
-
-# Copy uWSGI config
-COPY payment.ini .
-
-# Copy requirements and install
+# Build deps for uwsgi & friends
+RUN apk add --no-cache \
+    build-base \
+    linux-headers \
+    pcre-dev
+# Only requirements first for caching
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+# Install into /install (just like you did)
+RUN pip3 install --prefix=/install -r requirements.txt
 
-# Environment variables
+
+# ===========================
+# Stage 2: Runtime (Alpine)
+# ===========================
+FROM python:3.9.25-alpine3.21
+EXPOSE 8080
+WORKDIR /opt/server
+# Runtime deps only
+RUN apk add --no-cache pcre
+# Create non-root user
+RUN addgroup -S roboshop && adduser -S roboshop -G roboshop
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+# Copy app files
+COPY --chown=roboshop:roboshop payment.ini *.py requirements.txt .
 ENV CART_HOST="cart" \
     CART_PORT="8080" \
     USER_HOST="user" \
     USER_PORT="8080" \
-    AMPQPHOST="rabbitmq" \
+    AMQP_HOST="rabbitmq" \
     AMQP_USER="roboshop" \
-    AMQP_PASSWORD="roboshop123"
+    AMQP_PASS="roboshop123"
 
-# Expose port
-EXPOSE 8080
-
-# Run uWSGI
+USER roboshop
 CMD ["uwsgi", "--ini", "payment.ini"]
+
+
+# FROM python:3.9
+# EXPOSE 8080
+# WORKDIR /opt/server
+# COPY payment.ini .
+# COPY *.py .
+# COPY requirements.txt .
+# RUN pip3 install -r requirements.txt
+# ENV CART_HOST="cart" \
+#     CART_PORT="8080" \
+#     USER_HOST="user" \
+#     USER_PORT="8080" \
+#     AMQP_HOST="rabbitmq" \
+#     AMQP_USER="roboshop" \
+#     AMQP_PASS="roboshop123"
+# CMD ["uwsgi","--ini","payment.ini"]
