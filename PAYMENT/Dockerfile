@@ -55,3 +55,4 @@ CMD ["uwsgi", "--ini", "payment.ini"]
 #     AMQP_USER="roboshop" \
 #     AMQP_PASS="roboshop123"
 # CMD ["uwsgi","--ini","payment.ini"]
+
